@@ -507,7 +507,7 @@ class Application:
 
     def loadImages1(self):
         # load dialog images
-        dirname = os.path.join("images", "logos")
+        dirname = os.path.join("data", "images", "logos")
         for f in ("joker07_40_774",
                   "joker08_40_774",
                   "joker07_50_774",
@@ -519,7 +519,7 @@ class Application:
         #     dirname = os.path.join('images', 'dialog', 'default')
         # else:
         #     dirname = os.path.join('images', 'dialog', 'bluecurve')
-        dirname = os.path.join('images', 'dialog', 'remix')
+        dirname = os.path.join('data', 'images', 'dialog', 'remix')
         for f in ('error', 'info', 'question', 'warning'):
             fn = self.dataloader.findImage(f, dirname)
             im = loadImage(fn)
@@ -527,7 +527,7 @@ class Application:
 
         # load button images
         if 0 and TOOLKIT == 'tk':
-            dirname = os.path.join('images', 'buttons', 'bluecurve')
+            dirname = os.path.join('data', 'images', 'buttons', 'bluecurve')
             for n, f in (
                 (_('&OK'), 'ok'),
                 (_('&Cancel'), 'cancel'),
@@ -539,14 +539,14 @@ class Application:
 
     def loadImages2(self):
         # load canvas images
-        dirname = "images"
+        dirname = os.path.join("data", "images")
         # for f in ("noredeal", "redeal",):
         for f in ("stopsign", "redeal",):
             self.gimages.redeal.append(self.dataloader.findImage(f, dirname))
-        dirname = os.path.join("images", "demo")
+        dirname = os.path.join("data", "images", "demo")
         for f in ("demo01", "demo02", "demo03", "demo04", "demo05",):
             self.gimages.demo.append(self.dataloader.findImage(f, dirname))
-        dirname = os.path.join("images", "pause")
+        dirname = os.path.join("data", "images", "pause")
         for f in ("pause01", "pause02", "pause03",):
             self.gimages.pause.append(self.dataloader.findImage(f, dirname))
         # dirname = os.path.join("images", "stats")
@@ -556,14 +556,14 @@ class Application:
     def loadImages3(self):
         # load treeview images
         SelectDialogTreeData.img = []
-        dirname = os.path.join('images', 'tree')
+        dirname = os.path.join('data', 'images', 'tree')
         for f in ('folder', 'openfolder', 'node', 'emptynode'):
             fn = self.dataloader.findImage(f, dirname)
             im = loadImage(fn)
             SelectDialogTreeData.img.append(im)
 
         # load htmlviewer images
-        dirname = os.path.join('images', 'htmlviewer')
+        dirname = os.path.join('data', 'images', 'htmlviewer')
         fn = self.dataloader.findImage('disk', dirname)
         HTMLViewer.symbols_fn['disk'] = fn
 
@@ -1128,7 +1128,7 @@ class Application:
         screendepth = self.top.winfo_screendepth()
         manager = self.cardset_manager
         # find all available cardsets
-        dirs = manager.getSearchDirs(self, ("cardsets", ""), "PYSOL_CARDSETS")
+        dirs = manager.getSearchDirs(self, ("PySolFC-Cardsets-2.1", ""), "PYSOL_CARDSETS")
         if DEBUG:
             dirs += manager.getSearchDirs(self, "cardsets-*")
         found = []

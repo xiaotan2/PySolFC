@@ -23,7 +23,7 @@ from six.moves import tkinter_tkfiledialog
 
 def createToolbarMenu(menubar, menu):
     tearoff = menu.cget('tearoff')
-    data_dir = os.path.join(menubar.app.dataloader.dir, 'images', 'toolbar')
+    data_dir = os.path.join(menubar.app.dataloader.dir, 'data', 'images', 'toolbar')
     submenu = MfxMenu(menu, label=n_('Icon Style'), tearoff=tearoff)
     styledirs = os.listdir(data_dir)
     styledirs.sort()
