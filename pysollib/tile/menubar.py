@@ -45,6 +45,7 @@ from .tkwidget import MfxMessageDialog
 
 class PysolMenubarTk(PysolMenubarTkCommon):
     def __init__(self, app, top, progress=None):
+        print("Hello World!")
         PysolMenubarTkCommon.__init__(self, app, top, progress)
 
     def _setOptions(self):
