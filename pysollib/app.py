@@ -50,6 +50,7 @@ from pysollib.pysoltk import MfxDialog, MfxExceptionDialog, MfxMessageDialog
 from pysollib.pysoltk import MfxScrolledCanvas, TclError
 from pysollib.pysoltk import PysolProgressBar
 from pysollib.pysoltk import PysolStatusbar
+from pysollib.pysoltk import CodeRegion
 from pysollib.pysoltk import SelectCardsetDialogWithPreview
 from pysollib.pysoltk import SelectDialogTreeData
 from pysollib.pysoltk import destroy_find_card_dialog
@@ -367,12 +368,13 @@ class Application:
         for w, v in self.opt.statusbar_vars.items():
             self.statusbar.config(w, v)
         # create the canvas
+        self.code_region = CodeRegion(self.top)
         self.scrolled_canvas = MfxScrolledCanvas(self.top, propagate=True)
         self.canvas = self.scrolled_canvas.canvas
         padx, pady = TkSettings.canvas_padding
-        self.scrolled_canvas.grid(row=1, column=1, sticky='nsew',
+        self.scrolled_canvas.grid(row=1, column=2, sticky='nsew',
                                   padx=padx, pady=pady)
-        self.top.grid_columnconfigure(1, weight=1)
+        self.top.grid_columnconfigure(2, weight=1)
         self.top.grid_rowconfigure(1, weight=1)
         self.setTile(self.tabletile_index, force=True)
         # create the toolbar

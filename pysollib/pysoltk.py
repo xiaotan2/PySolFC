@@ -48,6 +48,7 @@ if TOOLKIT == 'tk':
         from pysollib.tile.menubar import *  # noqa: F401,F403
         from pysollib.tile.selectcardset import *  # noqa: F401,F403
         from pysollib.tile.selecttree import *  # noqa: F401,F403
+        from pysollib.tile.coderegion import *  # noqa: F401,F403
     else:
         from pysollib.tk.tkwidget import *  # noqa: F401,F403
         from pysollib.tk.tkhtml import *  # noqa: F401,F403

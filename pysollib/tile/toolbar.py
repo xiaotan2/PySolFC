@@ -172,6 +172,7 @@ class PysolToolbarTk:
         self.frame = ttk.Frame(top, class_='Toolbar',
                                relief=TkSettings.toolbar_relief,
                                borderwidth=TkSettings.toolbar_borderwidth)
+        self.frame.grid(column=0, columnspan=2)
         #
         for label, f, t in (
             (n_("New"),      self.mNewGame,   _("New game")),

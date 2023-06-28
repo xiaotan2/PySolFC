@@ -370,7 +370,7 @@ class PysolMenubarTkCommon:
         self.menubar = MfxMenubar(self.top, **kw)
 
         # init keybindings
-        bind(self.top, "<KeyPress>", self._keyPressHandler)
+        # bind(self.top, "<KeyPress>", self._keyPressHandler)
 
         m = "Ctrl-"
         if sys.platform == "darwin":
@@ -383,14 +383,14 @@ class PysolMenubarTkCommon:
 
         menu = MfxMenu(self.menubar, n_("&File"))
         menu.add_command(
-            label=n_("&New game"), command=self.mNewGame, accelerator="N")
+            label=n_("&New game"), command=self.mNewGame)
         submenu = MfxMenu(menu, label=n_("R&ecent games"))
         # menu.add_command(label=n_("Select &random game"),
         #   command=self.mSelectRandomGame, accelerator=m+"R")
         submenu = MfxMenu(menu, label=n_("Select &random game"))
         submenu.add_command(
             label=n_("&All games"), command=lambda:
-            self.mSelectRandomGame('all'), accelerator=m+"R")
+            self.mSelectRandomGame('all'))
         submenu.add_separator()
         submenu.add_command(
             label=n_("&Games played"),
@@ -406,10 +406,10 @@ class PysolMenubarTkCommon:
             command=lambda: self.mSelectRandomGame('not played'))
         menu.add_command(
             label=n_("Select game by nu&mber..."),
-            command=self.mSelectGameById, accelerator=m+"M")
+            command=self.mSelectGameById)
         menu.add_command(
             label=n_("Next game by num&ber"),
-            command=self.mNewGameWithNextId, accelerator=m+"N")
+            command=self.mNewGameWithNextId)
         menu.add_separator()
         submenu = MfxMenu(menu, label=n_("Fa&vorite games"))
         menu.add_command(label=n_("A&dd to favorites"), command=self.mAddFavor)
@@ -419,10 +419,10 @@ class PysolMenubarTkCommon:
         menu.add_separator()
         menu.add_command(
             label=n_("&Open..."),
-            command=self.mOpen, accelerator=m+"O")
+            command=self.mOpen)
         menu.add_command(
             label=n_("&Save"),
-            command=self.mSave, accelerator=m+"S")
+            command=self.mSave)
         menu.add_command(label=n_("Save &as..."), command=self.mSaveAs)
         menu.add_command(
             label=n_("E&xport current layout..."),
@@ -433,11 +433,11 @@ class PysolMenubarTkCommon:
         menu.add_separator()
         menu.add_command(
             label=n_("&Hold and quit"),
-            command=self.mHoldAndQuit, accelerator=m+"X")
+            command=self.mHoldAndQuit)
         if WIN_SYSTEM != "aqua":
             menu.add_command(
                 label=n_("&Quit"),
-                command=self.mQuit, accelerator=m+"Q")
+                command=self.mQuit)
 
         if self.progress:
             self.progress.update(step=1)
@@ -451,16 +451,16 @@ class PysolMenubarTkCommon:
         menu = MfxMenu(self.menubar, label=n_("&Edit"))
         menu.add_command(
             label=n_("&Undo"),
-            command=self.mUndo, accelerator="Z")
+            command=self.mUndo)
         menu.add_command(
             label=n_("&Redo"),
-            command=self.mRedo, accelerator="R")
+            command=self.mRedo)
         menu.add_command(label=n_("Redo &all"), command=self.mRedoAll)
 
         menu.add_separator()
         menu.add_command(
             label=n_("Restart"),
-            command=self.mRestart, accelerator=m+"G")
+            command=self.mRestart)
 
         menu.add_separator()
         submenu = MfxMenu(menu, label=n_("&Set bookmark"))
@@ -475,7 +475,7 @@ class PysolMenubarTkCommon:
             acc = m + "%d" % (i + 1)
             submenu.add_command(
                 label=label,
-                command=lambda i=i: self.mGotoBookmark(i), accelerator=acc)
+                command=lambda i=i: self.mGotoBookmark(i))
         menu.add_command(
             label=n_("&Clear bookmarks"),
             command=self.mClearBookmarks)
@@ -494,25 +494,25 @@ class PysolMenubarTkCommon:
         menu = MfxMenu(self.menubar, label=n_("&Game"))
         menu.add_command(
             label=n_("&Deal cards"),
-            command=self.mDeal, accelerator="D")
+            command=self.mDeal)
         menu.add_command(
             label=n_("&Auto drop"),
-            command=self.mDrop, accelerator="A")
+            command=self.mDrop)
         menu.add_command(
             label=n_("Shu&ffle tiles"),
-            command=self.mShuffle, accelerator="F")
+            command=self.mShuffle)
         menu.add_checkbutton(
             label=n_("&Pause"), variable=self.tkopt.pause,
-            command=self.mPause, accelerator="P")
+            command=self.mPause)
         # menu.add_command(
         #    label=n_("&Pause"), command=self.mPause, accelerator="P")
         menu.add_separator()
         menu.add_command(
             label=n_("S&tatus..."),
-            command=lambda: self.mPlayerStats(mode=100), accelerator=m+"Y")
+            command=lambda: self.mPlayerStats(mode=100))
         menu.add_command(
             label=n_("&Statistics..."),
-            command=self.mPlayerStats, accelerator=m+"T")
+            command=self.mPlayerStats)
         menu.add_command(
             label=n_("D&emo statistics..."),
             command=lambda: self.mPlayerStats(mode=1101))
@@ -527,17 +527,17 @@ class PysolMenubarTkCommon:
         menu = MfxMenu(self.menubar, label=n_("&Assist"))
         menu.add_command(
             label=n_("&Hint"),
-            command=self.mHint, accelerator="H")
+            command=self.mHint)
         menu.add_command(
             label=n_("Highlight p&iles"),
-            command=self.mHighlightPiles, accelerator="I")
+            command=self.mHighlightPiles)
         menu.add_command(
             label=n_("&Find card..."),
             command=self.mFindCard, accelerator="F3")
         menu.add_separator()
         menu.add_command(
             label=n_("&Demo"),
-            command=self.mDemo, accelerator=m+"D")
+            command=self.mDemo)
         menu.add_command(
             label=n_("Demo (&all games)"),
             command=self.mMixedDemo)
@@ -556,7 +556,7 @@ class PysolMenubarTkCommon:
         menu = MfxMenu(self.menubar, label=n_("&Options"))
         menu.add_command(
             label=n_("&Player options..."),
-            command=self.mOptPlayerOptions, accelerator=m+'P')
+            command=self.mOptPlayerOptions)
         submenu = MfxMenu(menu, label=n_("&Automatic play"))
         submenu.add_checkbutton(
             label=n_("Auto &face up"), variable=self.tkopt.autofaceup,
@@ -637,17 +637,17 @@ class PysolMenubarTkCommon:
             submenu = MfxMenu(menu, label=n_("Card si&ze"))
             submenu.add_command(
                 label=n_("&Increase the card size"),
-                command=self.mIncreaseCardset, accelerator=m+"+")
+                command=self.mIncreaseCardset)
             submenu.add_command(
                 label=n_("&Decrease the card size"),
-                command=self.mDecreaseCardset, accelerator=m+"-")
+                command=self.mDecreaseCardset)
             submenu.add_command(
                 label=n_("&Reset the card size"),
                 command=self.mResetCardset)
             submenu.add_separator()
             submenu.add_checkbutton(
                 label=n_("&Auto scaling"), variable=self.tkopt.auto_scale,
-                command=self.mOptAutoScale, accelerator=m+'0')
+                command=self.mOptAutoScale)
             submenu.add_checkbutton(
                 label=n_("&Preserve aspect ratio"),
                 variable=self.tkopt.preserve_aspect_ratio,
@@ -669,7 +669,7 @@ class PysolMenubarTkCommon:
         # n = manager.len()
         menu.add_command(
             label=n_("Cards&et..."),
-            command=self.mSelectCardsetDialog, accelerator=m+"E")
+            command=self.mSelectCardsetDialog)
         menu.add_command(
             label=n_("Table t&ile..."),
             command=self.mSelectTileDialog)
@@ -815,96 +815,6 @@ class PysolMenubarTkCommon:
 
         MfxMenubar.addPath = None
 
-        # FIXME: all key bindings should be *added* to keyPressHandler
-        ctrl = "Control-"
-        if sys.platform == "darwin":
-            ctrl = "Command-"
-        self._bindKey("",   "n", self.mNewGame)
-        self._bindKey(ctrl, "w", self.mSelectGameDialog)
-        self._bindKey(ctrl, "v", self.mSelectGameDialogWithPreview)
-        self._bindKey(ctrl, "r", lambda e: self.mSelectRandomGame())
-        self._bindKey(ctrl, "m", self.mSelectGameById)
-        self._bindKey(ctrl, "n", self.mNewGameWithNextId)
-        self._bindKey(ctrl, "o", self.mOpen)
-        self._bindKey(ctrl, "s", self.mSave)
-        self._bindKey(ctrl, "x", self.mHoldAndQuit)
-        self._bindKey(ctrl, "q", self.mQuit)
-        self._bindKey(ctrl, "z", self.mUndo)
-        self._bindKey("",   "z", self.mUndo)
-        self._bindKey("",   "BackSpace", self.mUndo)    # undocumented
-        self._bindKey("",   "KP_Enter", self.mUndo)     # undocumented
-        self._bindKey("",   "r", self.mRedo)
-        self._bindKey(ctrl, "g", self.mRestart)
-        self._bindKey("",   "space", self.mDeal)        # undocumented
-        self._bindKey(ctrl, "y", lambda e: self.mPlayerStats(mode=100))
-        self._bindKey(ctrl, "t", lambda e: self.mPlayerStats(mode=105))
-        self._bindKey("",   "h", self.mHint)
-        self._bindKey(ctrl, "h", self.mHint1)           # undocumented
-        # self._bindKey("",   "Shift_L", self.mHighlightPiles)
-        # self._bindKey("",   "Shift_R", self.mHighlightPiles)
-        self._bindKey("",   "i", self.mHighlightPiles)
-        self._bindKey("",   "F3", self.mFindCard)
-        self._bindKey(ctrl, "d", self.mDemo)
-        self._bindKey(ctrl, "e", self.mSelectCardsetDialog)
-        if USE_PIL:
-            self._bindKey(ctrl, "plus", self.mIncreaseCardset)
-            self._bindKey(ctrl, "equal", self.mIncreaseCardset)
-            self._bindKey(ctrl, "minus", self.mDecreaseCardset)
-            self._bindKey(ctrl, "0", self.mOptAutoScale)
-        self._bindKey(ctrl, "b", self.mOptChangeCardback)  # undocumented
-        self._bindKey(ctrl, "i", self.mOptChangeTableTile)  # undocumented
-        self._bindKey(ctrl, "p", self.mOptPlayerOptions)   # undocumented
-        self._bindKey(ctrl, "F1", self.mHelp)
-        self._bindKey("",   "F1", self.mHelpRules)
-        self._bindKey("",   "Print", self.mScreenshot)
-        self._bindKey(ctrl, "u", self.mPlayNextMusic)   # undocumented
-        self._bindKey("",   "p", self.mPause)
-        self._bindKey("",   "Pause", self.mPause)       # undocumented
-        self._bindKey("",   "Escape", self.mIconify)    # undocumented
-        # ASD and LKJ
-        self._bindKey("",   "a", self.mDrop)
-        self._bindKey(ctrl, "a", self.mDrop1)
-        self._bindKey("",   "s", self.mUndo)
-        self._bindKey("",   "d", self.mDeal)
-        self._bindKey("",   "l", self.mDrop)
-        self._bindKey(ctrl, "l", self.mDrop1)
-        self._bindKey("",   "k", self.mUndo)
-        self._bindKey("",   "j", self.mDeal)
-
-        self._bindKey("",   "F2", self.mStackDesk)
-        #
-        # undocumented, devel
-        self._bindKey("", "slash", lambda e: self.mPlayerStats(mode=106))
-        #
-        self._bindKey("",   "f", self.mShuffle)
-
-        for i in range(9):
-            self._bindKey(
-                ctrl, str(i+1),
-                lambda e, i=i: self.mGotoBookmark(i, confirm=0))
-
-        # undocumented, devel
-        self._bindKey(ctrl, "End", self.mPlayNextMusic)
-        self._bindKey(ctrl, "Prior", self.mSelectPrevGameByName)
-        self._bindKey(ctrl, "Next", self.mSelectNextGameByName)
-        self._bindKey(ctrl, "Up", self.mSelectPrevGameById)
-        self._bindKey(ctrl, "Down", self.mSelectNextGameById)
-
-        if os.name == 'posix' and platform.system() != 'Darwin':
-            self._bindKey('Alt-', 'F4', self.mQuit)
-
-    #
-    # key binding utility
-    #
-
-    def _bindKey(self, modifier, key, func):
-        sequence = "<" + modifier + "KeyPress-" + key + ">"
-        bind(self.top, sequence, func)
-        if len(key) == 1 and key != key.upper():
-            key = key.upper()
-            sequence = "<" + modifier + "KeyPress-" + key + ">"
-            bind(self.top, sequence, func)
-
     def _keyPressHandler(self, event):
         r = EVENT_PROPAGATE
         if event and self.game:
@@ -934,7 +844,7 @@ class PysolMenubarTkCommon:
         m = "Ctrl-"
         if sys.platform == "darwin":
             m = "Cmd-"
-        menu.add_command(label=n_("All &games..."), accelerator=m+"V",
+        menu.add_command(label=n_("All &games..."),
                          command=self.mSelectGameDialogWithPreview)
         if not SELECT_GAME_MENU:
             return
