@@ -418,6 +418,7 @@ class Application:
         self.game.create(self)
         # connect with game
         self.menubar.connectGame(self.game)
+        self.code_region.connectGame(self.game)
         if self.toolbar:  # ~
             self.toolbar.connectGame(self.game)
         self.game.updateStatus(player=self.opt.player)
