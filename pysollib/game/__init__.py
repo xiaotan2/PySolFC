@@ -3209,11 +3209,11 @@ class Game(object):
     def undoGotoBookmark(self):
         self.gotoBookmark(-1, update_stats=0)
 
-    def loadGame(self, filename):
-        if self.changed():
+    def loadGame(self, filename, skip_check: bool = False):
+        if self.changed() and not skip_check:
             if not self.areYouSure(_("Open game")):
                 return
-        self.finishMove()       # just in case
+        self.finishMove()
         game = None
         self.setCursor(cursor=CURSOR_WATCH)
         self.disableMenus()

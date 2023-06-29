@@ -1,5 +1,7 @@
 import traceback
 import sys
+import tempfile
+import os
 
 from six.moves import tkinter
 
@@ -24,9 +26,19 @@ class CodeRegion:
         self.text_area.grid(column=0, row=1)
         attach_scrollbar(self.frame, self.text_area, 1)
 
+        # Button group
+        self.button_group = tkinter.Frame(self.frame)
+        self.button_group.grid(column=0, row=2)
+
         # Button to execute the code
-        self.button_execute = tkinter.Button(self.frame, text="Execute", default="normal", command=self.callback_execute)
-        self.button_execute.grid(column=0, row=2)
+        self.button_execute = tkinter.Button(self.button_group, text="Execute",
+                                             default="normal", command=self.callback_execute)
+        self.button_execute.grid(column=0, row=0)
+
+        # Button to restore the state back
+        self.button_restore = tkinter.Button(self.button_group, text="Restore",
+                                             default="normal", command=self.callback_restore)
+        self.button_restore.grid(column=1, row=0)
 
         # A simple label
         tkinter.Label(self.frame, text="Console Log:").grid(column=0, row=3)
@@ -39,6 +51,14 @@ class CodeRegion:
         # Represents the Game class
         # Initialized from the app.py
         self.game = None
+
+        # Creates a temporary file that will be used to write the game save into.
+        # We will use it to restore the state.
+        self.state_directory = tempfile.TemporaryDirectory()
+        self.state_directory.__enter__()
+
+    def finalize(self):
+        self.state_directory.__exit__()
 
     def connectGame(self, game):
         self.game = game
@@ -60,7 +80,12 @@ class CodeRegion:
         self.add_console_log(text + "\n")
         print(text)
 
+    def callback_restore(self):
+        self.game.loadGame(os.path.join(self.state_directory.name, "state.data"), skip_check=True)
+
     def callback_execute(self):
+        self.game.saveGame(os.path.join(self.state_directory.name, "state.data"))
+        
         print("Executing command!")
         self.reset_console_log()
 
