@@ -58,7 +58,6 @@ class CodeRegion:
 
     def callback_execute(self):
         print("Executing command!")
-        self.game.dealCards()
         self.reset_console_log()
 
         code = self.get_code()
