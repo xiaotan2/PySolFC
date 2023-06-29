@@ -20,7 +20,7 @@ class CodeRegion:
         tkinter.Label(self.frame, text="Code Area:").grid(column=0, row=0)
 
         # Main text area for the code
-        self.text_area = tkinter.Text(self.frame, width=40, height=20)
+        self.text_area = tkinter.Text(self.frame, width=40, height=20, font='TkFixedFont')
         self.text_area.grid(column=0, row=1)
         attach_scrollbar(self.frame, self.text_area, 1)
 
@@ -32,7 +32,7 @@ class CodeRegion:
         tkinter.Label(self.frame, text="Console Log:").grid(column=0, row=3)
 
         # Console log
-        self.console_log = tkinter.Text(self.frame, width=40, height=8)
+        self.console_log = tkinter.Text(self.frame, width=40, height=8, font='TkFixedFont')
         self.console_log.grid(column=0, row=4)
         attach_scrollbar(self.frame, self.console_log, 4)
 
