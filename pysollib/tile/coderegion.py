@@ -56,6 +56,10 @@ class CodeRegion:
         self.add_console_log("Dealing cards")
         self.game.dealCards()
 
+    def action_print(self, text: str):
+        self.add_console_log(text + "\n")
+        print(text)
+
     def callback_execute(self):
         print("Executing command!")
         self.reset_console_log()
@@ -64,6 +68,7 @@ class CodeRegion:
 
         exec_globals = {
             "deal_cards": self.action_deal_cards,
+            "print": self.action_print,
         }
         
         try:
