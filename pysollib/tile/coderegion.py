@@ -73,7 +73,6 @@ class CodeRegion:
         self.console_log.insert(tkinter.END, value)
 
     def action_deal_cards(self):
-        self.add_console_log("Dealing cards")
         self.game.dealCards()
 
     def action_print(self, text: str):
@@ -82,6 +81,7 @@ class CodeRegion:
 
     def callback_restore(self):
         self.game.loadGame(os.path.join(self.state_directory.name, "state.data"), skip_check=True)
+        self.reset_console_log()
 
     def callback_execute(self):
         self.game.saveGame(os.path.join(self.state_directory.name, "state.data"))
