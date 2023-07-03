@@ -73,11 +73,58 @@ class CodeRegion:
         self.console_log.insert(tkinter.END, value)
 
     def action_deal_cards(self):
-        self.game.dealCards()
+        num_cards = self.game.dealCards()
+        self.add_console_log(f"Dealed {num_cards} cards from Stock\n")
 
     def action_print(self, text: str):
         self.add_console_log(text + "\n")
         print(text)
+    
+    def action_move_waste_to_fundation(self):
+        waste = self.game.s.waste
+        to_stack, ncards = waste.canDropCards(self.game.s.foundations)
+        if to_stack:
+            # each single drop is undo-able (note that this call
+            # is before the actual move)
+            self.game.finishMove()
+            waste.moveMove(ncards, to_stack)
+            self.add_console_log(f"Move {ncards} cards from waste to {to_stack}\n")
+
+    def action_move_waste_to_tableau(self):
+        waste = self.game.s.waste
+        to_stack, ncards = waste.canDropCards(self.game.s.rows)
+        if to_stack:
+            # each single drop is undo-able (note that this call
+            # is before the actual move)
+            self.game.finishMove()
+            waste.moveMove(ncards, to_stack)
+            self.add_console_log(f"Move {ncards} cards from waste to {to_stack}\n")
+
+    def action_move_tableau_to_fundation(self):
+        row_stacks = self.game.s.rows
+        for s in row_stacks:
+            to_stack, ncards = s.canDropCards(self.game.s.foundations)
+            if to_stack:
+                # each single drop is undo-able (note that this call
+                # is before the actual move)
+                self.game.finishMove()
+                s.moveMove(ncards, to_stack)
+                if s.canFlipCard():
+                    s.flipMove(animation=True)
+                self.add_console_log(f"Move {ncards} cards from {s} to {to_stack}\n")
+
+    def action_move_tableau_to_tableau(self):
+        row_stacks = self.game.s.rows
+        for s in row_stacks:
+            to_stack, ncards = s.canDropCards(self.game.s.rows)
+            if to_stack:
+                # each single drop is undo-able (note that this call
+                # is before the actual move)
+                self.game.finishMove()
+                s.moveMove(ncards, to_stack)
+                if s.canFlipCard():
+                    s.flipMove(animation=True)
+                self.add_console_log(f"Move {ncards} cards from {s} to {to_stack}\n")
 
     def callback_restore(self):
         self.game.loadGame(os.path.join(self.state_directory.name, "state.data"), skip_check=True)
@@ -94,6 +141,10 @@ class CodeRegion:
         exec_globals = {
             "deal_cards": self.action_deal_cards,
             "print": self.action_print,
+            "move_waste_to_fundation" : self.action_move_waste_to_fundation,
+            "move_waste_to_tableau" : self.action_move_waste_to_tableau,
+            "move_tableau_to_fundation" : self.action_move_tableau_to_fundation,
+            "move_tableau_to_tableau" : self.action_move_tableau_to_tableau,
         }
         
         try:
