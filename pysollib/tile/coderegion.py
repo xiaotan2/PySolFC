@@ -79,52 +79,83 @@ class CodeRegion:
     def action_print(self, text: str):
         self.add_console_log(text + "\n")
         print(text)
+
+    # function that returns stack or stacks
+    def waste(self):
+        return self.game.s.waste # single stack (pysollib.stack.WasteStack)
+
+    def foundation(self):
+        return self.game.s.foundations # multiple stacks (tuple)
+
+    def tableau(self):
+        return self.game.s.rows # multiple stacks (tuple)
+
+    def column(self, index):
+        if index < 0 or index > 6:
+            raise Exception(f"Index {index} out of range for columns.\n"
+                "Tip: valid column index is from 0 to 6")
+        return self.game.s.rows[index] # single stack (pysollib.stack.KingAC_RowStack)
+
+    def check_move(self, from_stacks, to_stacks):
+        # first convert to_stacks to a tuple list that canDropCards accepts
+        if not isinstance(to_stacks, tuple):
+            to_stacks = (to_stacks,)
+
+        canMove = False
+        # handle from_stacks if it is a tuple list
+        if isinstance(from_stacks, tuple):
+            for s in from_stacks:
+                toStack, ncards = s.canDropCards(to_stacks)
+                if toStack:
+                    canMove = True
+                    break
+        # handle from_stacks if it is a single stack
+        else:
+            toStack, ncards = from_stacks.canDropCards(to_stacks)
+            if toStack:
+                canMove = True
+        return canMove
+
+    def action_move(self, from_stacks, to_stacks):
+        # first convert to_stacks to a tuple list that canDropCards accepts
+        if not isinstance(to_stacks, tuple):
+            to_stacks = (to_stacks,)
+
+        # handle from_stacks if it is a tuple list
+        if isinstance(from_stacks, tuple):
+            moved = False
+            for s in from_stacks:
+                to_stack, ncards = s.canDropCards(to_stacks)
+                if to_stack:
+                    # each single drop is undo-able (note that this call
+                    # is before the actual move)
+                    self.game.finishMove()
+                    s.moveMove(ncards, to_stack)
+                    self.add_console_log(f"Move {ncards} cards from {s} to {to_stack}\n")
+                    moved = True
+            # raise an exception if we end up not moving. It forces
+            # the player to check before move
+            if not moved:
+                raise Exception(f"Can't move from {s} to {to_stack}\n")
+        # handle from_stacks if it is a single stack
+        else:
+            to_stack, ncards = from_stacks.canDropCards(to_stacks)
+            if to_stack:
+                # each single drop is undo-able (note that this call
+                # is before the actual move)
+                self.game.finishMove()
+                from_stacks.moveMove(ncards, to_stack)
+                self.add_console_log(f"Move {ncards} cards from {from_stacks} to {to_stack}\n")
+            # raise an exception if we end up not moving. It forces
+            # the player to check before move
+            else:
+                raise Exception(f"Can't move from {s} to {to_stack}\n")
     
-    def action_move_waste_to_fundation(self):
-        waste = self.game.s.waste
-        to_stack, ncards = waste.canDropCards(self.game.s.foundations)
-        if to_stack:
-            # each single drop is undo-able (note that this call
-            # is before the actual move)
-            self.game.finishMove()
-            waste.moveMove(ncards, to_stack)
-            self.add_console_log(f"Move {ncards} cards from waste to {to_stack}\n")
-
-    def action_move_waste_to_tableau(self):
-        waste = self.game.s.waste
-        to_stack, ncards = waste.canDropCards(self.game.s.rows)
-        if to_stack:
-            # each single drop is undo-able (note that this call
-            # is before the actual move)
-            self.game.finishMove()
-            waste.moveMove(ncards, to_stack)
-            self.add_console_log(f"Move {ncards} cards from waste to {to_stack}\n")
-
-    def action_move_tableau_to_fundation(self):
-        row_stacks = self.game.s.rows
-        for s in row_stacks:
-            to_stack, ncards = s.canDropCards(self.game.s.foundations)
-            if to_stack:
-                # each single drop is undo-able (note that this call
-                # is before the actual move)
-                self.game.finishMove()
-                s.moveMove(ncards, to_stack)
-                if s.canFlipCard():
-                    s.flipMove(animation=True)
-                self.add_console_log(f"Move {ncards} cards from {s} to {to_stack}\n")
-
-    def action_move_tableau_to_tableau(self):
-        row_stacks = self.game.s.rows
-        for s in row_stacks:
-            to_stack, ncards = s.canDropCards(self.game.s.rows)
-            if to_stack:
-                # each single drop is undo-able (note that this call
-                # is before the actual move)
-                self.game.finishMove()
-                s.moveMove(ncards, to_stack)
-                if s.canFlipCard():
-                    s.flipMove(animation=True)
-                self.add_console_log(f"Move {ncards} cards from {s} to {to_stack}\n")
+    def check_size(self, stack):
+        if isinstance(stack, tuple):
+            raise Exception("Can't check the size of multiple stacks of cards.\n"
+                "Tip: Use waste() or column(index) for check_size()")
+        return len(stack.cards)
 
     def callback_restore(self):
         self.game.loadGame(os.path.join(self.state_directory.name, "state.data"), skip_check=True)
@@ -139,12 +170,15 @@ class CodeRegion:
         code = self.get_code()
 
         exec_globals = {
+            "waste": self.waste,
+            "foundation": self.foundation,
+            "tableau": self.tableau,
+            "column": self.column,
             "deal_cards": self.action_deal_cards,
             "print": self.action_print,
-            "move_waste_to_fundation" : self.action_move_waste_to_fundation,
-            "move_waste_to_tableau" : self.action_move_waste_to_tableau,
-            "move_tableau_to_fundation" : self.action_move_tableau_to_fundation,
-            "move_tableau_to_tableau" : self.action_move_tableau_to_tableau,
+            "check_move": self.check_move,
+            "check_size": self.check_size,
+            "move": self.action_move,
         }
         
         try:
