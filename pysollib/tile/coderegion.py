@@ -131,6 +131,8 @@ class CodeRegion:
                     # is before the actual move)
                     self.game.finishMove()
                     s.moveMove(ncards, to_stack)
+                    if s.canFlipCard():
+                        s.flipMove(animation=True)
                     self.add_console_log(f"Move {ncards} cards from {s} to {to_stack}\n")
                     moved = True
             # raise an exception if we end up not moving. It forces
@@ -145,6 +147,8 @@ class CodeRegion:
                 # is before the actual move)
                 self.game.finishMove()
                 from_stacks.moveMove(ncards, to_stack)
+                if from_stacks.canFlipCard():
+                    from_stacks.flipMove(animation=True)
                 self.add_console_log(f"Move {ncards} cards from {from_stacks} to {to_stack}\n")
             # raise an exception if we end up not moving. It forces
             # the player to check before move
