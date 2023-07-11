@@ -154,6 +154,10 @@ class CodeRegion:
             # the player to check before move
             else:
                 raise Exception(f"Can't move from {s} to {to_stack}\n")
+
+    def action_undo(self):
+        self.game.finishMove()
+        self.game.undo()
     
     def check_size(self, stack):
         if isinstance(stack, tuple):
@@ -183,6 +187,7 @@ class CodeRegion:
             "check_move": self.check_move,
             "check_size": self.check_size,
             "move": self.action_move,
+            "undo": self.action_undo,
         }
         
         try:
