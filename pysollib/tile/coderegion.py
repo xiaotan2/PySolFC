@@ -131,6 +131,8 @@ class CodeRegion:
                     # is before the actual move)
                     self.game.finishMove()
                     s.moveMove(ncards, to_stack)
+                    if s.canFlipCard():
+                        s.flipMove(animation=True)
                     self.add_console_log(f"Move {ncards} cards from {s} to {to_stack}\n")
                     moved = True
             # raise an exception if we end up not moving. It forces
@@ -145,11 +147,17 @@ class CodeRegion:
                 # is before the actual move)
                 self.game.finishMove()
                 from_stacks.moveMove(ncards, to_stack)
+                if from_stacks.canFlipCard():
+                    from_stacks.flipMove(animation=True)
                 self.add_console_log(f"Move {ncards} cards from {from_stacks} to {to_stack}\n")
             # raise an exception if we end up not moving. It forces
             # the player to check before move
             else:
                 raise Exception(f"Can't move from {s} to {to_stack}\n")
+
+    def action_undo(self):
+        self.game.finishMove()
+        self.game.undo()
     
     def check_size(self, stack):
         if isinstance(stack, tuple):
@@ -179,6 +187,7 @@ class CodeRegion:
             "check_move": self.check_move,
             "check_size": self.check_size,
             "move": self.action_move,
+            "undo": self.action_undo,
         }
         
         try:
