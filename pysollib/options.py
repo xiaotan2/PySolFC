@@ -470,7 +470,10 @@ class Options:
         self.tabletile_scale_method = 0
         self.resampling = 0
         if USE_PIL:
-            self.resampling = int(Image.ANTIALIAS)
+            if hasattr(Image, 'ANTIALIAS'):
+                self.resampling = int(Image.ANTIALIAS)
+            else:
+                self.resampling = int(Image.LANCZOS)
         # solver
         self.solver_presets = [
             'none',

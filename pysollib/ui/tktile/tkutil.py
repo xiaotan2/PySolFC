@@ -288,7 +288,12 @@ if Image:
             im = PIL_Image(image=im)
             return im
 
-        def resize(self, xf, yf, resample=Image.ANTIALIAS):
+        def resize(self, xf, yf, resample=None):
+            if resample is None:
+                if hasattr(Image, "ANTIALIAS"):
+                    resample = Image.ANTIALIAS
+                else:
+                    resample = Image.LANCZOS
 
             w, h = self._pil_image_orig.size
             w0, h0 = int(w*xf), int(h*yf)
