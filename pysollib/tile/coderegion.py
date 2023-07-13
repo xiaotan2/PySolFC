@@ -3,7 +3,19 @@ import sys
 import tempfile
 import os
 
+from typing import List, Optional
+from enum import Enum
+from pysollib.acard import AbstractCard
+
 from six.moves import tkinter
+
+
+class Suit(Enum):
+    ANY = -1
+    CLUB = 0
+    SPADE = 1
+    HEART = 2
+    DIAMOND = 3
 
 
 def attach_scrollbar(frame: tkinter.Frame, text_area: tkinter.Text, row: int):
@@ -76,8 +88,8 @@ class CodeRegion:
         num_cards = self.game.dealCards()
         self.add_console_log(f"Dealed {num_cards} cards from Stock\n")
 
-    def action_print(self, text: str):
-        self.add_console_log(text + "\n")
+    def action_print(self, text: any):
+        self.add_console_log(str(text) + "\n")
         print(text)
 
     # function that returns stack or stacks
@@ -164,6 +176,38 @@ class CodeRegion:
             raise Exception("Can't check the size of multiple stacks of cards.\n"
                 "Tip: Use waste() or column(index) for check_size()")
         return len(stack.cards)
+    
+    def check_exists(self, stack: object, rank: int, suit: Suit):
+        """
+        Returns true if any of the cards in the stack match the criteria.
+        """
+        
+        if isinstance(stack, tuple):
+            raise Exception("Can't check the the presence of a card in multiple stacks.\n"
+                "Tip: Use waste() or column(index) for check_size()")
+        if not isinstance(suit, Suit):
+            raise Exception("suit must be one of the following: ANY, SPADE, HEART, DIAMOND, CLUB")
+                
+        def predicate(card: AbstractCard) -> bool:
+            return card.rank == rank and (card.suit == suit.value or suit == Suit.ANY) and card.face_up
+        
+        return any([predicate(card) for card in stack.cards])
+    
+    def check_top(self, stack: object, rank: int, suit: Suit):
+        """
+        Returns true if the top card in the stack matches the criteria.
+        """
+        
+        if isinstance(stack, tuple):
+            raise Exception("Can't check the the presence of a card in multiple stacks.\n"
+                "Tip: Use waste() or column(index) for check_size()")
+        if not isinstance(suit, Suit):
+            raise Exception("suit must be one of the following: ANY, SPADE, HEART, DIAMOND, CLUB")
+                
+        def predicate(card: AbstractCard) -> bool:
+            return card.rank == rank and (card.suit == suit.value or suit == Suit.ANY)
+        
+        return len(stack.cards) > 0 and predicate(stack.cards[-1])
 
     def callback_restore(self):
         self.game.loadGame(os.path.join(self.state_directory.name, "state.data"), skip_check=True)
@@ -186,8 +230,15 @@ class CodeRegion:
             "print": self.action_print,
             "check_move": self.check_move,
             "check_size": self.check_size,
+            "check_exists": self.check_exists,
+            "check_top": self.check_top,
             "move": self.action_move,
             "undo": self.action_undo,
+            "ANY": Suit.ANY,
+            "SPADE": Suit.SPADE,
+            "HEART": Suit.HEART,
+            "DIAMOND": Suit.DIAMOND,
+            "CLUB": Suit.CLUB,
         }
         
         try:
