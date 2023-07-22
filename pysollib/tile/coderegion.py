@@ -176,6 +176,17 @@ class CodeRegion:
             raise Exception("Can't check the size of multiple stacks of cards.\n"
                 "Tip: Use waste() or column(index) for check_size()")
         return len(stack.cards)
+
+    def check_face_up_size(self, stack):
+        if isinstance(stack, tuple):
+            raise Exception("Can't check the size of multiple stacks of cards.\n"
+                "Tip: Use waste() or column(index) for check_size()")
+        num_face_up = len([c for c in stack.cards if c.face_up])
+        return num_face_up
+
+    def check_face_down_size(self, stack):
+        num_face_down = self.check_size(stack) - self.check_face_up_size(stack)
+        return num_face_down
     
     def check_exists(self, stack: object, rank: int, suit: Suit):
         """
@@ -230,6 +241,8 @@ class CodeRegion:
             "print": self.action_print,
             "check_move": self.check_move,
             "check_size": self.check_size,
+            "check_face_up_size": self.check_face_up_size,
+            "check_face_down_size": self.check_face_down_size,
             "check_exists": self.check_exists,
             "check_top": self.check_top,
             "move": self.action_move,
