@@ -157,6 +157,7 @@ class CodeRegion:
                     self.add_console_log(f"Move {ncards} cards from {s} to {to_stack}\n")
                     moved = True
                     self.step_count += 1
+                    break
             # raise an exception if we end up not moving. It forces
             # the player to check before move
             if not moved:
@@ -176,7 +177,7 @@ class CodeRegion:
             # raise an exception if we end up not moving. It forces
             # the player to check before move
             else:
-                raise Exception(f"Can't move from {s} to {to_stack}\n")
+                raise Exception(f"Can't move from {from_stacks} to {to_stack}\n")
 
     def action_undo(self):
         self.game.finishMove()
