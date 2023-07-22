@@ -2153,11 +2153,17 @@ class OpenStack(Stack):
     def canDropCards(self, stacks):
         if self.basicIsBlocked() or not self.cards:
             return (None, 0)
-        cards = self.cards[-1:]
-        if self.canMoveCards(cards):
-            for s in stacks:
-                if s is not self and s.acceptsCards(self, cards):
-                    return (s, 1)
+        # Starting from 1 face up cards, check all face up
+        # cards if any sequence of them can be moved
+        for i in range(1, len(self.cards)):
+            cards = self.cards[-i:]
+            
+            if not cardsFaceUp(cards):
+                break
+            if self.canMoveCards(cards):
+                for s in stacks:
+                    if s is not self and s.acceptsCards(self, cards):
+                        return (s, i)
         return (None, 0)
 
     #

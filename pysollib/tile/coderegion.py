@@ -69,6 +69,10 @@ class CodeRegion:
         self.state_directory = tempfile.TemporaryDirectory()
         self.state_directory.__enter__()
 
+        # A simple step count to prevent infinite loop per player code execution
+        self.step_count = 0
+        self.step_max = 150 # In average, players makes 45 moves in a single game
+
     def finalize(self):
         self.state_directory.__exit__()
 
@@ -129,6 +133,11 @@ class CodeRegion:
         return canMove
 
     def action_move(self, from_stacks, to_stacks):
+        # First check if we have reached the maximum steps
+        if self.step_count >= self.step_max:
+            raise Exception(f"You have made more moves than allowed {self.step_max}\n"
+                "Is there an infinite loop in your code?")
+
         # first convert to_stacks to a tuple list that canDropCards accepts
         if not isinstance(to_stacks, tuple):
             to_stacks = (to_stacks,)
@@ -147,6 +156,8 @@ class CodeRegion:
                         s.flipMove(animation=True)
                     self.add_console_log(f"Move {ncards} cards from {s} to {to_stack}\n")
                     moved = True
+                    self.step_count += 1
+                    break
             # raise an exception if we end up not moving. It forces
             # the player to check before move
             if not moved:
@@ -162,10 +173,11 @@ class CodeRegion:
                 if from_stacks.canFlipCard():
                     from_stacks.flipMove(animation=True)
                 self.add_console_log(f"Move {ncards} cards from {from_stacks} to {to_stack}\n")
+                self.step_count += 1
             # raise an exception if we end up not moving. It forces
             # the player to check before move
             else:
-                raise Exception(f"Can't move from {s} to {to_stack}\n")
+                raise Exception(f"Can't move from {from_stacks} to {to_stack}\n")
 
     def action_undo(self):
         self.game.finishMove()
@@ -176,6 +188,17 @@ class CodeRegion:
             raise Exception("Can't check the size of multiple stacks of cards.\n"
                 "Tip: Use waste() or column(index) for check_size()")
         return len(stack.cards)
+
+    def check_face_up_size(self, stack):
+        if isinstance(stack, tuple):
+            raise Exception("Can't check the size of multiple stacks of cards.\n"
+                "Tip: Use waste() or column(index) for check_size()")
+        num_face_up = len([c for c in stack.cards if c.face_up])
+        return num_face_up
+
+    def check_face_down_size(self, stack):
+        num_face_down = self.check_size(stack) - self.check_face_up_size(stack)
+        return num_face_down
     
     def check_exists(self, stack: object, rank: int, suit: Suit):
         """
@@ -230,6 +253,8 @@ class CodeRegion:
             "print": self.action_print,
             "check_move": self.check_move,
             "check_size": self.check_size,
+            "check_face_up_size": self.check_face_up_size,
+            "check_face_down_size": self.check_face_down_size,
             "check_exists": self.check_exists,
             "check_top": self.check_top,
             "move": self.action_move,
@@ -240,6 +265,9 @@ class CodeRegion:
             "DIAMOND": Suit.DIAMOND,
             "CLUB": Suit.CLUB,
         }
+
+        # Reset step count every time we execute the code
+        step_count = 0
         
         try:
             exec(code, exec_globals)
