@@ -189,6 +189,7 @@ class PysolToolbarTk:
             (n_("Pause"),    self.mPause,     _("Pause game")),
             (None,           None,            None),
             (n_("Statistics"), self.mPlayerStats, _("View statistics")),
+            (n_("Leaderboard"), self.mLoaderboardStats, _("View global leaderboard")),
             (n_("Rules"),    self.mHelpRules, _("Rules for this game")),
             (None,           None,            None),
             (n_("Quit"),     self.mQuit,      _("Quit %s") % TITLE),

@@ -31,6 +31,7 @@ from pysollib.mfxutil import USE_PIL, print_err
 from pysollib.mygettext import _
 from pysollib.pysolrandom import construct_random
 from pysollib.pysoltk import AllGames_StatsDialog, SingleGame_StatsDialog
+from pysollib.pysoltk import Leaderboard
 from pysollib.pysoltk import ColorsDialog
 from pysollib.pysoltk import EditTextDialog
 from pysollib.pysoltk import FontsDialog
@@ -588,6 +589,10 @@ class PysolMenubar(PysolMenubarTk):
             MfxMessageDialog(
                 self.top, title=_("%s Info") % TITLE, bitmap="info",
                 text=text % {'filename': filename})
+            
+    def mLoaderboardStats(self, *args, **kw):
+        player = self.app.opt.player
+        d = Leaderboard(self.top, self.app, self.game, player)
 
     def mPlayerStats(self, *args, **kw):
         wasPaused = False
@@ -976,6 +981,11 @@ class PysolToolbar(PysolToolbarTk):
     def mPlayerStats(self, *args):
         if not self._busy():
             self.menubar.mPlayerStats()
+        return 1
+    
+    def mLoaderboardStats(self, *args):
+        if not self._busy():
+            self.menubar.mLoaderboardStats()
         return 1
 
     def mHelpRules(self, *args):
