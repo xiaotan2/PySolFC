@@ -239,7 +239,6 @@ class CodeRegion:
     def callback_execute(self):
         self.game.saveGame(os.path.join(self.state_directory.name, "state.data"))
         
-        print("Executing command!")
         self.reset_console_log()
 
         code = self.get_code()
@@ -271,12 +270,22 @@ class CodeRegion:
         
         try:
             exec(code, exec_globals)
+        except SyntaxError as e:
+            self.add_console_log(f"Error at line {e.lineno}: {str(e.msg)}")
         except Exception as e:
-            print(e)
+            print(e, type(e))
+
             # Find the correct traceback frame for the "exec"
             # and print the error for that line.
             frames = traceback.extract_tb(e.__traceback__)
+            lineno: int = None
             for frame in frames:
                 print(f"Error at: {frame.filename}:{frame.lineno} {frame.name}")
                 if frame.filename == "<string>":
-                    self.add_console_log(f"Error at line {frame.lineno}: {str(e)}")
+                    lineno = frame.lineno
+            
+
+            if lineno is not None:
+                self.add_console_log(f"Error at line {lineno}: {str(e)}")
+            else:
+                self.add_console_log(str(e))
