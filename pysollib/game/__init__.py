@@ -25,6 +25,9 @@
 import math
 import time
 import traceback
+import urllib.parse
+import requests
+import json
 from pickle import Pickler, Unpickler, UnpicklingError
 
 import attr
@@ -86,6 +89,7 @@ assert getattr(attr, '__version_info__', (0, 0, 0)) >= (18, 2, 0), (
 
 PLAY_TIME_TIMEOUT = 200
 S_PLAY = 0x40
+LEADERBOARD_SERVER_BASE_URL = "http://ec2-3-249-19-236.eu-west-1.compute.amazonaws.com"
 
 # ************************************************************************
 # * Base class for all solitaire games
@@ -1343,6 +1347,11 @@ class Game(object):
             return
         tb, sb = self.app.toolbar, self.app.statusbar
         for k, v in six.iteritems(kw):
+            # Update leaderboards only if the score is higher than 0
+            # Also make sure that the value is present, otherwise this gets stuck on exit!
+            if k == "moves" and v and len(v) > 0 and v[0] > 0:
+                self._update_leaderboard(v[0])
+
             _updateStatus_process_key_val(tb, sb, k, v)
 
     def _unmapHandler(self, event):
@@ -3518,6 +3527,45 @@ class Game(object):
     def _startAndDealRowAndCards(self):
         self._startAndDealRow()
         self.s.talon.dealCards()
+
+    def _update_leaderboard(self, score: int):
+        """
+        Updates the leaderboard score with the current player.
+        This does not throw an exception if something goes wrong!
+        """
+        
+        player = self.app.opt.player
+        path = f"/api/leaderboard/{urllib.parse.quote(player)}"
+        url = f"{LEADERBOARD_SERVER_BASE_URL}{path}"
+        body = {
+            "score": score,
+        }
+        headers = {
+            "Content-Type": "application/json",
+        }
+        try:
+            r = requests.put(url, data=json.dumps(body), headers=headers)
+            if r.status_code != 200 and r.status_code != 204:
+                print(r.text)
+        except Exception as e:
+            # Do not crash the game if the score can not be updated
+            print(e)
+
+    def get_leaderboard(self):
+        """
+        Returns leaderboard scores for all players.
+        This may throw if something goes wrong!
+        """
+        
+        path = f"/api/leaderboard"
+        url = f"{LEADERBOARD_SERVER_BASE_URL}{path}"
+        headers = {
+            "Accept": "application/json",
+        }
+        r = requests.get(url, headers=headers)
+        if r.status_code != 200 and r.status_code != 204:
+            raise Exception(r.text)
+        return r.json()
 
 
 class StartDealRowAndCards(object):
