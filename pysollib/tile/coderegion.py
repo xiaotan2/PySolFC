@@ -6,9 +6,9 @@ import os
 from typing import List, Optional
 from enum import Enum
 from pysollib.acard import AbstractCard
+from pysollib.pysoltk import MfxMessageDialog
 
 from six.moves import tkinter
-
 
 class Suit(Enum):
     ANY = -1
@@ -23,12 +23,110 @@ def attach_scrollbar(frame: tkinter.Frame, text_area: tkinter.Text, row: int):
     scrollbar.grid(row=row, column=1, sticky='nsew')
     text_area['yscrollcommand'] = scrollbar.set
 
+function_tutorials = {
+# Format:
+# . function name : [function signature, instruction, usage]
+    "print" : ["print(object) returns None",
+               "Printing the given object on the Console window.",
+               "Usage: \n\nprint(\"Hello World\")\nprint(check_size(column(0)))"],
+    "waste" : ["waste() returns 1 card stack",
+               "Get the stack of cards from Waste area.",
+               "Usage: \n\nwaste()\ncheck_size(waste())"],
+    "foundation" : ["foundation() returns 4 card stacks",
+                    "Get the stacks of cards from all suites in Foundation area.",
+                    "Usage: \n\nfoundation()\nmove(waste(), foundation())"],
+    "tableau" : ["tableau() returns 7 card stacks",
+                 "Get the stacks of cards from all columns in Tableau area",
+                 "Usage: \n\ntableau()\nmove(tableau(), tableau())"],
+    "column" : ["column(index) returns 1 card stack",
+                "Get the stack of cards from a specified column in the Tableau area. The index is from 0 to 6.",
+                "Usage: \n\ncolumn(2)\ncheck_size(column(6))"],
+    "deal_cards" : ["deal_cards() returns None",
+                    "Deal 1 card from the Stock to the Waste.",
+                    "Usage: \n\ndeal_cards()"],
+    "move" : ["move(source, destination) returns None",
+               "Moving 1 card or multiple cards from source to destination, if the move is valid.\n"
+               "Both source and destination can be a single card stack like column(index), or multiple card stacks like tableau()\n"
+               "When source or destination is multiple card stacks like tableau(), the program automatically finds the first valid move.\n"
+               "If the move is invalid, the function throws an exception and the player program stops.",
+               "Usage: \n\nmove(waste(), foundation())\nmove(tableau(), column(0))\nmove(tableau(), foundation())"],
+    "check_move" : ["check_move(source, destination) returns True or False",
+                    "Check if calling move(source, destination) is valid. Returns True if it is valid, otherwise returns False.\n"
+                    "Inputs source and destination share the same properties with the inputs for move(source, destination).",
+                    "Usage: \n\ncheck_move(waste(), foundation())"],
+    "undo" : ["undo() returns None",
+              "Undo the last move.",
+              "Usage: \n\nundo()"],
+    "check_size" : ["check_size(cards) returns size",
+                    "Check the total size of given card stack.\nInput cards must be a single card stack column(index).\n"
+                    "tableau() and foundation() gets multiple card stacks and are invalid input for cards.",
+                    "Usage: \n\ncheck_size(column(2))"],
+    "check_face_up_size" : ["check_face_up_size(cards) returns size",
+                    "Check the size of face-up cards in a given card stack.\nInput cards must be a single card stack column(index).\n"
+                    "tableau() and foundation() gets multiple card stacks and are invalid input for cards.",
+                    "Usage: \n\ncheck_face_up_size(column(2))"],
+    "check_face_down_size" : ["check_face_down_size(cards) returns size",
+                    "Check the size of face-down cards of a given card stack.\nInput cards must be a single card stack column(index).\n"
+                    "tableau() and foundation() gets multiple card stacks and are invalid input for cards.",
+                    "Usage: \n\ncheck_face_down_size(column(2))"],
+    "check_exists" : ["check_exists(cards, rank, suite) returns True or False",
+                    "Check if a given card stack contains a specific card. Returns True if exist, otherwise returns False.\n"
+                    "tableau() and foundation() gets multiple card stacks and are invalid input for cards.\n"
+                    "rank is from 1 to 13. suite is a value from these variables: [ANY, SPADE, HEART, DIAMOND, CLUB].",
+                    "Usage: \n\ncheck_exists(column(4), 13, CLUB)\ncheck_exists(column(2), 1, ANY)"],
+    "check_top" : ["check_top(cards, rank, suite) returns True or False",
+                    "Check if the top card of the given card stack matches a specific card. Returns True if match, otherwise returns False.\n"
+                    "tableau() and foundation() gets multiple card stacks and are invalid input for cards.\n"
+                    "rank is from 1 to 13. suite is a value from these variables: [ANY, SPADE, HEART, DIAMOND, CLUB].",
+                    "Usage: \n\ncheck_top(column(4), 13, CLUB)\ncheck_top(column(2), 1, ANY)"],
+}
+
+# Use an ordered list to enforce the order of tutorial buttons
+# for the available functions
+function_tutorial_list = [
+    "print",
+    "waste",
+    "foundation",
+    "tableau",
+    "column",
+    "deal_cards",
+    "move",
+    "check_move",
+    "undo",
+    "check_size",
+    "check_face_up_size",
+    "check_face_down_size",
+    "check_exists",
+    "check_top",
+
+]
 
 class CodeRegion:
     def __init__(self, top) -> None:
+        self.top = top
+
         # The frame that will vertically align all widgets
         self.frame = tkinter.Frame(top)
         self.frame.grid(column=1, row=1, padx=10, pady=10)
+
+        # Create a tutorial frame
+        self.tutorial = tkinter.Frame(top)
+        self.tutorial.grid(column=3, row=1, padx=10, pady=10)
+        tkinter.Label(self.tutorial, text="Functions:").grid(column=0, row=0)
+
+        self.tutorial_button_group = tkinter.Frame(self.tutorial)
+        self.tutorial_button_group.grid(column=0, row=1)
+
+        self.tutorial_buttons = []
+        for index in range(0, len(function_tutorial_list)):
+            function_name = function_tutorial_list[index]
+            tutorial_info = function_tutorials[function_name]
+            self.tutorial_buttons.append(
+                tkinter.Button(self.tutorial_button_group,
+                    text=tutorial_info[0], default="normal",
+                    command=lambda name=function_name: self.callback_tutorial_button(name))
+            )
+            self.tutorial_buttons[index].grid(column=0, row=index)
 
         # A simple label
         tkinter.Label(self.frame, text="Code Area:").grid(column=0, row=0)
@@ -231,6 +329,15 @@ class CodeRegion:
             return card.rank == rank and (card.suit == suit.value or suit == Suit.ANY)
         
         return len(stack.cards) > 0 and predicate(stack.cards[-1])
+
+    # callback function when tutorial button is invoked
+    # tutorial_info has the format [function signature, instruction, usage]
+    def callback_tutorial_button(self, name):
+        tutorial_info = function_tutorials[name]
+        d = MfxMessageDialog(self.top, title=name,
+                             text="Function:\n\n" + tutorial_info[0] + "\n\n"
+                                + tutorial_info[1] + "\n\n" + tutorial_info[2],
+                             justify="left")
 
     def callback_restore(self):
         self.game.loadGame(os.path.join(self.state_directory.name, "state.data"), skip_check=True)
