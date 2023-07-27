@@ -192,7 +192,7 @@ class CodeRegion:
 
     def action_print(self, text: any):
         self.add_console_log(str(text) + "\n")
-        print(text)
+        print(str(text))
 
     # function that returns stack or stacks
     def waste(self):
@@ -308,7 +308,10 @@ class CodeRegion:
                 "Tip: Use waste() or column(index) for check_size()")
         if not isinstance(suit, Suit):
             raise Exception("suit must be one of the following: ANY, SPADE, HEART, DIAMOND, CLUB")
-                
+
+        # convert from 1-based index to 0-based index
+        rank -= 1
+
         def predicate(card: AbstractCard) -> bool:
             return card.rank == rank and (card.suit == suit.value or suit == Suit.ANY) and card.face_up
         
@@ -324,7 +327,10 @@ class CodeRegion:
                 "Tip: Use waste() or column(index) for check_size()")
         if not isinstance(suit, Suit):
             raise Exception("suit must be one of the following: ANY, SPADE, HEART, DIAMOND, CLUB")
-                
+
+        # convert from 1-based index to 0-based index
+        rank -= 1
+
         def predicate(card: AbstractCard) -> bool:
             return card.rank == rank and (card.suit == suit.value or suit == Suit.ANY)
         
