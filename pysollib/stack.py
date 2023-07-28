@@ -2162,6 +2162,11 @@ class OpenStack(Stack):
                 break
             if self.canMoveCards(cards):
                 for s in stacks:
+                    # Ignore if we are moving entire stack into
+                    # another stack that is fully empty
+                    if i == len(self.cards) and len(s.cards) == 0:
+                        continue
+
                     if s is not self and s.acceptsCards(self, cards):
                         return (s, i)
         return (None, 0)
