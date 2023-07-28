@@ -2155,7 +2155,7 @@ class OpenStack(Stack):
             return (None, 0)
         # Starting from 1 face up cards, check all face up
         # cards if any sequence of them can be moved
-        for i in range(1, len(self.cards)):
+        for i in range(1, len(self.cards) + 1):
             cards = self.cards[-i:]
             
             if not cardsFaceUp(cards):
