@@ -3,7 +3,8 @@ import sys
 import tempfile
 import os
 
-from typing import List, Optional
+from typing import List, Optional, Callable
+from types import MethodType
 from enum import Enum
 from pysollib.acard import AbstractCard
 from pysollib.pysoltk import MfxMessageDialog
@@ -339,6 +340,7 @@ class CodeRegion:
                     # is before the actual move)
                     self.game.finishMove()
                     s.moveMove(ncards, to_stack)
+                    self.game.checkForWin()
                     if s.canFlipCard():
                         s.flipMove(animation=True)
 
@@ -364,6 +366,7 @@ class CodeRegion:
                 # is before the actual move)
                 self.game.finishMove()
                 from_stacks.moveMove(ncards, to_stack)
+                self.game.checkForWin()
                 if from_stacks.canFlipCard():
                     from_stacks.flipMove(animation=True)
                 self.add_console_log(f"Move {ncards} cards from {from_stacks} to {to_stack}\n")
@@ -456,6 +459,16 @@ class CodeRegion:
 
         code = self.get_code()
 
+        # A function decorator to check if the game has finished before
+        # executing the function.
+        def check_for_win_wrapper(func: Callable) -> Callable:
+            def wrapper(*args, **kwargs):
+                if self.game.finished:
+                    raise Exception("Execution stop, the game has finished!")
+                return func(*args, **kwargs)
+            return wrapper
+
+
         exec_globals = {
             "waste": self.waste,
             "foundation": self.foundation,
@@ -477,6 +490,11 @@ class CodeRegion:
             "DIAMOND": Suit.DIAMOND,
             "CLUB": Suit.CLUB,
         }
+        
+        # Wraps all functions in the exec_globals with the function decorator
+        for key, item in exec_globals.items():
+            if isinstance(item, MethodType):
+                exec_globals[key] = check_for_win_wrapper(item)
 
         # Reset step count every time we execute the code
         step_count = 0
