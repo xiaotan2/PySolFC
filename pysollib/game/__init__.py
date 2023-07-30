@@ -562,6 +562,7 @@ class Game(object):
         self.init_size = (0, 0)
         self.center_offset = (0, 0)
         self.event_handled = False      # if click event handled by Stack (???)
+        self.moves_by_code = 0
         self.reset()
 
     # main constructor
@@ -782,6 +783,7 @@ class Game(object):
         self.gsaveinfo = GameGlobalSaveInfo()
         # some vars for win animation
         self.win_animation = GameWinAnimation()
+        self.moves_by_code = 0
 
     def getTitleName(self):
         return self.app.getGameTitleName(self.id)
@@ -866,6 +868,7 @@ class Game(object):
         if not self.preview:
             self.startPlayTimer()
         self.busy = old_busy
+        self.moves_by_code = 0
 
     def restoreGame(self, game, reset=1):
         old_busy, self.busy = self.busy, 1
@@ -929,6 +932,7 @@ class Game(object):
                 self.top.update_idletasks()
                 self.top.show_now()
         self.startPlayTimer()
+        self.moves_by_code = game.moves_by_code
 
     def restoreGameFromBookmark(self, bookmark):
         old_busy, self.busy = self.busy, 1
@@ -1347,11 +1351,6 @@ class Game(object):
             return
         tb, sb = self.app.toolbar, self.app.statusbar
         for k, v in six.iteritems(kw):
-            # Update leaderboards only if the score is higher than 0
-            # Also make sure that the value is present, otherwise this gets stuck on exit!
-            if k == "moves" and v and len(v) > 0 and v[0] > 0:
-                self._update_leaderboard(v[0])
-
             _updateStatus_process_key_val(tb, sb, k, v)
 
     def _unmapHandler(self, event):
@@ -3388,6 +3387,7 @@ class Game(object):
             game.gstats.__dict__.update(gstats.__dict__)
             stats = pload(GameStatsStruct)
             game.stats.__dict__.update(stats.__dict__)
+        game.moves_by_code = pload(int)
         game._loadGameHook(p)
         dummy = pload(str)
         validate(dummy == "EOF", err_txt)
@@ -3527,6 +3527,11 @@ class Game(object):
     def _startAndDealRowAndCards(self):
         self._startAndDealRow()
         self.s.talon.dealCards()
+        
+    def update_moves_by_code(self, increment: int):
+        self.moves_by_code += increment
+        print(f"Updated self.moves_by_code to: {self.moves_by_code}")
+        self._update_leaderboard(self.moves_by_code)    
 
     def _update_leaderboard(self, score: int):
         """
