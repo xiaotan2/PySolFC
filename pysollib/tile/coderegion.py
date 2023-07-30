@@ -479,7 +479,7 @@ class CodeRegion:
         }
 
         # Reset step count every time we execute the code
-        step_count = 0
+        self.step_count = 0
         
         try:
             exec(code, exec_globals)
