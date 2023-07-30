@@ -17,11 +17,18 @@ class Suit(Enum):
     HEART = 2
     DIAMOND = 3
 
+suite_to_letter = [
+    "c",
+    "s",
+    "h",
+    "d"
+]
 
 def attach_scrollbar(frame: tkinter.Frame, text_area: tkinter.Text, row: int):
     scrollbar = tkinter.Scrollbar(frame, command=text_area.yview)
     scrollbar.grid(row=row, column=1, sticky='nsew')
     text_area['yscrollcommand'] = scrollbar.set
+
 
 function_tutorials = {
 # Format:
@@ -81,6 +88,7 @@ function_tutorials = {
                     "Usage: \n\ncheck_top(column(4), 13, CLUB)\ncheck_top(column(2), 1, ANY)"],
 }
 
+
 # Use an ordered list to enforce the order of tutorial buttons
 # for the available functions
 function_tutorial_list = [
@@ -100,6 +108,7 @@ function_tutorial_list = [
     "check_top",
 
 ]
+
 
 class CodeRegion:
     def __init__(self, top) -> None:
@@ -171,6 +180,74 @@ class CodeRegion:
         self.step_count = 0
         self.step_max = 150 # In average, players makes 45 moves in a single game
 
+        self.state_set = set()
+
+    # Calculate a state represented by a single string for the current
+    # top cards of all card stacks in the game
+    def _get_current_state(self):
+        state = ""
+        # adding all top cars from tableau()
+        tableau = self.tableau()
+        for row in tableau:
+            if len(row.cards) > 0:
+                top = row.cards[-1]
+                state += f"{suite_to_letter[top.suit]}{top.rank},"
+            else:
+                state += "-1,"
+        # adding all top cars from foundations()
+        foundations = self.foundation()
+        for row in foundations:
+            if len(row.cards) > 0:
+                top = row.cards[-1]
+                state += f"{suite_to_letter[top.suit]}{top.rank},"
+            else:
+                state += "-1,"
+        # adding top card from waste()
+        if len(self.waste().cards) > 0:
+            top = self.waste().cards[-1]
+            state += f"{suite_to_letter[top.suit]}{top.rank},"
+        else:
+            state += "-1,"
+
+        return state
+
+    # Calculate a state represented by a single string for the future
+    # top cards of all cards after a move is performed
+    def _get_future_state(self, from_stack, ncards, to_stack):
+        # get the state of the top after a move is carried out
+        def get_future_top_state(stack, from_stack, ncards, to_stack):
+            new_top = stack.cards[-1] if len(stack.cards) > 0 else None
+            # current top card comes from from_stack
+            if stack == from_stack:
+                # after moving ncards, from_stack will be empty
+                if len(from_stack.cards) <= ncards:
+                    new_top = None
+                # after moving ncards, there is still card at the from_stack
+                else:
+                    new_top = from_stack.cards[-(ncards + 1)]
+            # current top card comes from to_stack
+            elif stack == to_stack:
+                new_top = from_stack.cards[-1]
+
+            if new_top is None:
+                return "-1,"
+            else:
+                return f"{suite_to_letter[new_top.suit]}{new_top.rank},"
+            
+
+        state = ""
+        # adding all top cars from tableau()
+        tableau = self.tableau()
+        for row in tableau:
+            state += get_future_top_state(row, from_stack, ncards, to_stack)
+        # adding all top cars from foundations()
+        foundations = self.foundation()
+        for row in foundations:
+            state += get_future_top_state(row, from_stack, ncards, to_stack)
+        # adding top card from waste()
+        state += get_future_top_state(self.waste(), from_stack, ncards, to_stack)
+        return state
+
     def finalize(self):
         self.state_directory.__exit__()
 
@@ -221,6 +298,11 @@ class CodeRegion:
             for s in from_stacks:
                 toStack, ncards = s.canDropCards(to_stacks)
                 if toStack:
+                    # check the state after the move, if future state has occured
+                    # before, it isn't the best strategy
+                    future_state = self._get_future_state(s, ncards, toStack)
+                    if future_state in self.state_set:
+                        continue
                     canMove = True
                     break
         # handle from_stacks if it is a single stack
@@ -246,12 +328,20 @@ class CodeRegion:
             for s in from_stacks:
                 to_stack, ncards = s.canDropCards(to_stacks)
                 if to_stack:
+                    # check the state after the move, if future state has occured
+                    # before, it isn't the best strategy
+                    future_state = self._get_future_state(s, ncards, to_stack)
+                    print(future_state)
+                    if future_state in self.state_set:
+                        continue
+
                     # each single drop is undo-able (note that this call
                     # is before the actual move)
                     self.game.finishMove()
                     s.moveMove(ncards, to_stack)
                     if s.canFlipCard():
                         s.flipMove(animation=True)
+
                     self.add_console_log(f"Move {ncards} cards from {s} to {to_stack}\n")
                     moved = True
                     self.step_count += 1
@@ -260,8 +350,14 @@ class CodeRegion:
             # the player to check before move
             if not moved:
                 raise Exception(f"Can't move from {s} to {to_stack}\n")
+            else:
+                new_state = self._get_current_state()
+                if new_state not in self.state_set:
+                    self.state_set.add(new_state)
+                    print(new_state)
         # handle from_stacks if it is a single stack
         else:
+            # note: we don't check state duplication if moving from a single stack
             to_stack, ncards = from_stacks.canDropCards(to_stacks)
             if to_stack:
                 # each single drop is undo-able (note that this call
@@ -272,6 +368,10 @@ class CodeRegion:
                     from_stacks.flipMove(animation=True)
                 self.add_console_log(f"Move {ncards} cards from {from_stacks} to {to_stack}\n")
                 self.step_count += 1
+
+                new_state = self._get_current_state()
+                if new_state not in self.state_set:
+                    self.state_set.add(new_state)
             # raise an exception if we end up not moving. It forces
             # the player to check before move
             else:
