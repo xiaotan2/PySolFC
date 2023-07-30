@@ -52,5 +52,6 @@ def pysolDumpGame(game_, p, bookmark=0):
             game_.gstats.saved += 1
         p.dump(game_.gstats)
         p.dump(game_.stats)
+    p.dump(game_.moves_by_code)
     game_._saveGameHook(p)
     p.dump("EOF")

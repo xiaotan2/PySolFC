@@ -338,6 +338,7 @@ class CodeRegion:
                     # each single drop is undo-able (note that this call
                     # is before the actual move)
                     self.game.finishMove()
+                    self.game.update_moves_by_code(1)
                     s.moveMove(ncards, to_stack)
                     if s.canFlipCard():
                         s.flipMove(animation=True)
@@ -363,6 +364,7 @@ class CodeRegion:
                 # each single drop is undo-able (note that this call
                 # is before the actual move)
                 self.game.finishMove()
+                self.game.update_moves_by_code(1)
                 from_stacks.moveMove(ncards, to_stack)
                 if from_stacks.canFlipCard():
                     from_stacks.flipMove(animation=True)
