@@ -65,28 +65,28 @@ function_tutorials = {
     "undo" : ["undo() returns None",
               "Undo the last move.",
               "Usage: \n\nundo()"],
-    "check_size" : ["check_size(cards) returns size",
-                    "Check the total size of given card stack.\nInput cards must be a single card stack column(index).\n"
-                    "tableau() and foundation() gets multiple card stacks and are invalid input for cards.",
-                    "Usage: \n\ncheck_size(column(2))"],
-    "check_face_up_size" : ["check_face_up_size(cards) returns size",
-                    "Check the size of face-up cards in a given card stack.\nInput cards must be a single card stack column(index).\n"
-                    "tableau() and foundation() gets multiple card stacks and are invalid input for cards.",
-                    "Usage: \n\ncheck_face_up_size(column(2))"],
-    "check_face_down_size" : ["check_face_down_size(cards) returns size",
-                    "Check the size of face-down cards of a given card stack.\nInput cards must be a single card stack column(index).\n"
-                    "tableau() and foundation() gets multiple card stacks and are invalid input for cards.",
-                    "Usage: \n\ncheck_face_down_size(column(2))"],
-    "check_exists" : ["check_exists(cards, rank, suite) returns True or False",
-                    "Check if a given card stack contains a specific card. Returns True if exist, otherwise returns False.\n"
-                    "tableau() and foundation() gets multiple card stacks and are invalid input for cards.\n"
+    "check_size" : ["check_size(column_index) returns size",
+                    "Check the total size of a given column.\n"
+                    "column_index refers to column in the Tableau area. The index is from 0 to 6.",
+                    "Usage: \n\ncheck_size(2)"],
+    "check_face_up_size" : ["check_face_up_size(column_index) returns size",
+                    "Check the size of cards facing up in a given column.\n"
+                    "column_index refers to column in the Tableau area. The index is from 0 to 6.",
+                    "Usage: \n\ncheck_face_up_size(2)"],
+    "check_face_down_size" : ["check_face_down_size(column_index) returns size",
+                    "Check the size of cards facing down in a given column.\n"
+                    "column_index refers to column in the Tableau area. The index is from 0 to 6.",
+                    "Usage: \n\ncheck_face_down_size(2)"],
+    "check_face_up_exists" : ["check_face_up_exists(column_index, rank, suite) returns True or False",
+                    "Check if the cards facing up in a given column contains a specific card. Returns True if exist, otherwise returns False.\n"
+                    "column_index refers to column in the Tableau area. The index is from 0 to 6.\n"
                     "rank is from 1 to 13. suite is a value from these variables: [ANY, SPADE, HEART, DIAMOND, CLUB].",
-                    "Usage: \n\ncheck_exists(column(4), 13, CLUB)\ncheck_exists(column(2), 1, ANY)"],
-    "check_top" : ["check_top(cards, rank, suite) returns True or False",
-                    "Check if the top card of the given card stack matches a specific card. Returns True if match, otherwise returns False.\n"
-                    "tableau() and foundation() gets multiple card stacks and are invalid input for cards.\n"
+                    "Usage: \n\ncheck_face_up_exists(4, 13, CLUB)\ncheck_face_up_exists(2, 1, ANY)"],
+    "check_top" : ["check_top(column_index, rank, suite) returns True or False",
+                    "Check if the top card of the given column matches a specific card. Returns True if match, otherwise returns False.\n"
+                    "column_index refers to column in the Tableau area. The index is from 0 to 6.\n"
                     "rank is from 1 to 13. suite is a value from these variables: [ANY, SPADE, HEART, DIAMOND, CLUB].",
-                    "Usage: \n\ncheck_top(column(4), 13, CLUB)\ncheck_top(column(2), 1, ANY)"],
+                    "Usage: \n\ncheck_top(4, 13, CLUB)\ncheck_top(2, 1, ANY)"],
 }
 
 
@@ -105,9 +105,8 @@ function_tutorial_list = [
     "check_size",
     "check_face_up_size",
     "check_face_down_size",
-    "check_exists",
+    "check_face_up_exists",
     "check_top",
-
 ]
 
 
@@ -122,6 +121,8 @@ class CodeRegion:
         # Create a tutorial frame
         self.tutorial = tkinter.Frame(top)
         self.tutorial.grid(column=3, row=1, padx=10, pady=10)
+
+        # Functions tutorials
         tkinter.Label(self.tutorial, text="Functions:").grid(column=0, row=0)
 
         self.tutorial_button_group = tkinter.Frame(self.tutorial)
@@ -282,7 +283,7 @@ class CodeRegion:
     def tableau(self):
         return self.game.s.rows # multiple stacks (tuple)
 
-    def column(self, index):
+    def column(self, index: int):
         if index < 0 or index > 6:
             raise Exception(f"Index {index} out of range for columns.\n"
                 "Tip: valid column index is from 0 to 6")
@@ -386,31 +387,22 @@ class CodeRegion:
         self.game.finishMove()
         self.game.undo()
     
-    def check_size(self, stack):
-        if isinstance(stack, tuple):
-            raise Exception("Can't check the size of multiple stacks of cards.\n"
-                "Tip: Use waste() or column(index) for check_size()")
-        return len(stack.cards)
+    def check_size(self, index: int):
+        return len(self.column(index).cards)
 
-    def check_face_up_size(self, stack):
-        if isinstance(stack, tuple):
-            raise Exception("Can't check the size of multiple stacks of cards.\n"
-                "Tip: Use waste() or column(index) for check_size()")
-        num_face_up = len([c for c in stack.cards if c.face_up])
+    def check_face_up_size(self, index: int):
+        num_face_up = len([c for c in self.column(index).cards if c.face_up])
         return num_face_up
 
-    def check_face_down_size(self, stack):
-        num_face_down = self.check_size(stack) - self.check_face_up_size(stack)
+    def check_face_down_size(self, index: int):
+        num_face_down = self.check_size(index) - self.check_face_up_size(index)
         return num_face_down
     
-    def check_exists(self, stack: object, rank: int, suit: Suit):
+    def check_face_up_exists(self, index: int, rank: int, suit: Suit):
         """
-        Returns true if any of the cards in the stack match the criteria.
+        Returns true if any of the cards facing up in the column match the criteria.
         """
         
-        if isinstance(stack, tuple):
-            raise Exception("Can't check the the presence of a card in multiple stacks.\n"
-                "Tip: Use waste() or column(index) for check_size()")
         if not isinstance(suit, Suit):
             raise Exception("suit must be one of the following: ANY, SPADE, HEART, DIAMOND, CLUB")
 
@@ -420,16 +412,13 @@ class CodeRegion:
         def predicate(card: AbstractCard) -> bool:
             return card.rank == rank and (card.suit == suit.value or suit == Suit.ANY) and card.face_up
         
-        return any([predicate(card) for card in stack.cards])
+        return any([predicate(card) for card in self.column(index).cards])
     
-    def check_top(self, stack: object, rank: int, suit: Suit):
+    def check_top(self, index: int, rank: int, suit: Suit):
         """
-        Returns true if the top card in the stack matches the criteria.
+        Returns true if the top card in the column matches the criteria.
         """
         
-        if isinstance(stack, tuple):
-            raise Exception("Can't check the the presence of a card in multiple stacks.\n"
-                "Tip: Use waste() or column(index) for check_size()")
         if not isinstance(suit, Suit):
             raise Exception("suit must be one of the following: ANY, SPADE, HEART, DIAMOND, CLUB")
 
@@ -439,7 +428,7 @@ class CodeRegion:
         def predicate(card: AbstractCard) -> bool:
             return card.rank == rank and (card.suit == suit.value or suit == Suit.ANY)
         
-        return len(stack.cards) > 0 and predicate(stack.cards[-1])
+        return len(self.column(index).cards) > 0 and predicate(self.column(index).cards[-1])
 
     # callback function when tutorial button is invoked
     # tutorial_info has the format [function signature, instruction, usage]
@@ -482,7 +471,7 @@ class CodeRegion:
             "check_size": self.check_size,
             "check_face_up_size": self.check_face_up_size,
             "check_face_down_size": self.check_face_down_size,
-            "check_exists": self.check_exists,
+            "check_face_up_exists": self.check_face_up_exists,
             "check_top": self.check_top,
             "move": self.action_move,
             "undo": self.action_undo,
