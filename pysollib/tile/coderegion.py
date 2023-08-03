@@ -31,6 +31,36 @@ def attach_scrollbar(frame: tkinter.Frame, text_area: tkinter.Text, row: int):
     text_area['yscrollcommand'] = scrollbar.set
 
 
+# Use an ordered list to enforce the order of tutorial buttons
+python_tutorial_list = [
+    "Using a Function",
+    "Using Conditions",
+    "Using Loops"
+]
+
+
+python_tutorials = {
+# Format:
+# . function name : [function signature, instruction, usage]
+    "Using a Function" : "A function is a block of code which only runs when it is called.\n"
+               "To define a function, use this format:\n\ndef function_name(input1, input2)\n  code\n\n"
+               "To call a function:\n\noutput = function_name(input1, input2)\n\n"
+               "Note: indentation(space or tabs) inside a function matters in Python\n"
+               "Example:\n\ndef hello(input):\n  print(input)\n  return \"okay\"\n"
+               "output = hello(\"Say Hello!\")",
+    "Using Conditions" : "Conditions are used to run different code based on the decision.\n"
+               "The most common condition is \"if statement\":\n\nif conditon:\n  do_something\n\n"
+               "condition must be a boolean value (True or False).\n"
+               "Example:\n\nif input is \"hello\":\n  print(input)\nelse:\n  print(\"not hello\")\n",
+    "Using Loops" : "Loops are used to run code repeatedly. It has multiple forms: for loop and while loop\n"
+               "\"for loop\":\n\nfor i in range(0, 10):\n  do_something\n"
+               "\"while loop\":\n\nwhile condition:\n  do_something\n"
+               "condition must be a boolean value (True or False).\n"
+               "Example:\n\nfor i in range(0, 10):\n  print(i)\n"
+               "i = 0\nwhile i < 10:\n  print(i)\n  i = i + 1",
+}
+
+
 function_tutorials = {
 # Format:
 # . function name : [function signature, instruction, usage]
@@ -77,7 +107,7 @@ function_tutorials = {
                     "Check the size of cards facing down in a given column.\n"
                     "column_index refers to column in the Tableau area. The index is from 0 to 6.",
                     "Usage: \n\ncheck_face_down_size(2)"],
-    "check_face_up_exists" : ["check_face_up_exists(column_index, rank, suite) returns True or False",
+    "check_face_up_exists" : ["check_face_up_exists(index, rank, suite) returns True or False",
                     "Check if the cards facing up in a given column contains a specific card. Returns True if exist, otherwise returns False.\n"
                     "column_index refers to column in the Tableau area. The index is from 0 to 6.\n"
                     "rank is from 1 to 13. suite is a value from these variables: [ANY, SPADE, HEART, DIAMOND, CLUB].",
@@ -122,11 +152,27 @@ class CodeRegion:
         self.tutorial = tkinter.Frame(top)
         self.tutorial.grid(column=3, row=1, padx=10, pady=10)
 
+        # Python tutorials
+        tkinter.Label(self.tutorial, text="Python Basics:").grid(column=0, row=0)
+
+        self.python_button_group = tkinter.Frame(self.tutorial)
+        self.python_button_group.grid(column=0, row=1)
+
+        self.python_buttons = []
+        for index in range(0, len(python_tutorial_list)):
+            function_name = python_tutorial_list[index]
+            self.python_buttons.append(
+                tkinter.Button(self.python_button_group,
+                    text=function_name, default="normal",
+                    command=lambda name=function_name: self.callback_python_button(name))
+            )
+            self.python_buttons[index].grid(column=0, row=index)
+
         # Functions tutorials
-        tkinter.Label(self.tutorial, text="Functions:").grid(column=0, row=0)
+        tkinter.Label(self.tutorial, text="Functions:").grid(column=0, row=2)
 
         self.tutorial_button_group = tkinter.Frame(self.tutorial)
-        self.tutorial_button_group.grid(column=0, row=1)
+        self.tutorial_button_group.grid(column=0, row=3)
 
         self.tutorial_buttons = []
         for index in range(0, len(function_tutorial_list)):
@@ -429,6 +475,14 @@ class CodeRegion:
             return card.rank == rank and (card.suit == suit.value or suit == Suit.ANY)
         
         return len(self.column(index).cards) > 0 and predicate(self.column(index).cards[-1])
+
+    # callback function when tutorial button is invoked
+    # tutorial_info has the format [function signature, instruction, usage]
+    def callback_python_button(self, name):
+        tutorial_info = python_tutorials[name]
+        d = MfxMessageDialog(self.top, title=name,
+                             text=tutorial_info,
+                             justify="left")
 
     # callback function when tutorial button is invoked
     # tutorial_info has the format [function signature, instruction, usage]
