@@ -19,10 +19,10 @@
 /po/pt_BR.po
 /tests/individually-importing/*.py
 /tests/unit-generated/*.py
-PySolFC-Cardsets--Minimal-2.0.*
-PySolFC-Cardsets--Minimal-2.0/
-PySolFC-Cardsets-2.0.*
-PySolFC-Cardsets-2.0/
+PySolFC-Cardsets--Minimal-2.1.*
+PySolFC-Cardsets--Minimal-2.1/
+PySolFC-Cardsets-2.1.*
+PySolFC-Cardsets-2.1/
 android/*.apk
 android/*.zip
 android/bin/keystore
