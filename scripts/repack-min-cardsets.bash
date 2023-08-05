@@ -6,7 +6,7 @@
 # Distributed under terms of the MIT license.
 #
 
-set -e -x
+set -e
 
 src_base="PySolFC-Cardsets"
 dest_base="$src_base--Minimal"
@@ -17,10 +17,10 @@ src_arc="$src_vbase.tar.bz2"
 
 if ! test -f "$src_arc"
 then
-    wget -c "https://sourceforge.net/projects/pysolfc/files/$src_base/$src_vbase/$src_arc/download" -O "$src_arc"
+    wget -c "https://pysolfc-cardsets-2-mirror.s3.eu-west-1.amazonaws.com/$src_base/$src_vbase/$src_arc" -O "$src_arc"
 fi
 
-tar -xvf "$src_arc"
+tar -xf "$src_arc" 
 rm -rf "$dest_vbase"
 mkdir -p "$dest_vbase"
 cat scripts/cardsets_to_bundle | (while read b
@@ -28,4 +28,4 @@ do
     cp -a "$src_vbase/$b" "$dest_vbase/$b"
 done)
 
-tar -cavf "$dest_vbase.tar.xz" "$dest_vbase"
+tar -caf "$dest_vbase.tar.xz" "$dest_vbase"
