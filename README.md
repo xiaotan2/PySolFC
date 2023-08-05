@@ -39,3 +39,31 @@ To play the game simply run the following command.
 # You must be inside the `PySolFC` folder!
 ./play.sh
 ```
+
+## Troubleshooting
+
+### ImportError libtk8 (Linux specific issue)
+
+If you get the following error:
+
+```
+ImportError: libtk8.6.so: cannot open shared object file: No such file or directory
+```
+
+Then use one of the following commands to install the missing dependency:
+
+If you are on Ubuntu:
+
+```bash
+sudo apt-get install tk
+```
+
+If you are on Arch:
+```bash
+sudo pacman -S tk
+```
+
+If you are on Fedora:
+```bash
+sudo dnf install tk
+```
